@@ -1,19 +1,13 @@
 # # Key-value data store
 
 # 1. importing necessary things
-# - redis for inerting, reading and deleting records
-# - pickle converts python dictionary to json
-# - json used to deal with its object
-# - os for saving and deleting files
-# 
-# 2. and connecting to localhost
 import redis
 import pickle
 import json
 import os
 
+# 2. and connecting to localhost
 r = redis.Redis("localhost")
-
 
 # inserting record to database
 #     - key: key for redis record
@@ -39,7 +33,6 @@ def create(key, value, ttl, expiry):
     else:
         print('Key already exists')
 
-
 # Finds key record
 def read(key):
     return r.get(key)
@@ -47,7 +40,6 @@ def read(key):
 # deleting record with specified key
 #     - if record not found returns False 
 #     - else returns true after removing record from database (json file still exists)
-
 
 def delete(key):
     value = r.get(key)
@@ -65,55 +57,49 @@ def validity(key):
 
 if __name__ == "__main__": 
     while(True):
+        # os.system('cls')
         print("---------------- MENU ----------------")
-        print("1. Insert\n2. Read\n3. Delete\n4. Check time remainnig\n5. Exit")
-        choice = int(input())
+        print("1. Insert\n2. Read\n3. Delete\n4. Check time remainnig\n5. Exit\n")
+        choice = int(input('$ '))
         if(choice==1):
             # ### Insert record in database
-            print('Enter key: ')
-            key = input()
+            key = input('\nEnter key: ')
 
-            print('Enter number of attributes: ') # specify nu/mber of attributes for json file
-            n = int(input())
+            # specify nu/mber of attributes for json file
+            n = int(input('\nEnter number of attributes: '))
 
             value = {}
             # for each attributes: take attribute name and its value
             for i in range(n):
-                print('Enter attribute name: ')
-                attribute = input()
-                print('Enter attribute value: ')
-                val = input()
+                attribute = input(f'\nEnter attribute-{i+1} name: ')
+                val = input(f'Enter attribute-{i+1} value: ')
                 value.update({attribute : val})
             # value is python dictionary that will be converted in json object
 
-            print('Key supports TTL? y/n') # ttl should have value 'y' or 'n'
-            ttl = input()
+            # ttl should have value 'y' or 'n'
+            ttl = input('\nKey supports TTL? y/n: ')
 
             if(ttl=='y'):
-                print('Enter validity in seconds')
-                expiry = input()
+                expiry = input('Enter validity in seconds: ')
                 create(key, value, True, expiry)
             elif(ttl=='n'):
                 create(key, value, False, -1)
 
-
         elif(choice==2):
             # ### Search for a key
-            print('Enter key to search: ')
-            key = input()
+            key = input('\nEnter key to search: ')
 
             value = read(key)
 
             if(value==None):
-                print('Key not exists')
+                print('>> Key not exists')
             else:
                 p_value = pickle.loads(value)
                 print(p_value)
 
         elif(choice==3):
             # ### Delete record
-            print('Enter key of object to delete it: ')
-            key = input()
+            key = input('\nEnter key of object to delete it: ')
 
             status = delete(key) # if provided key exists delete() will return True otherwise False
 
@@ -122,22 +108,21 @@ if __name__ == "__main__":
                 # necessary while trying delete file of ttl redis record
                 if(os.path.isfile(file_name)):
                     os.remove(file_name) # deleting json file
-                print('Record removed')
+                print('>> Record removed')
             else:
-                print('Record/Key not found')
+                print('>> Record/Key not found')
 
         elif(choice==4):
             # ### Check time remaining for key
-            print('Enter key check validity of key: ')
-            key = input()
+            key = input('\nEnter key check validity of key: ')
 
             seconds = validity(key)
             if(seconds==-1):
-                print(f"{key} does not have expiry timeout")
+                print(f">> {key} does not have expiry timeout")
             elif(seconds==-2):
-                print(f"{key} does not exists")
+                print(f">> {key} does not exists")
             else:
-                print(f"{seconds}s")
+                print(f">> {seconds}s")
 
         else:
             break;
@@ -145,9 +130,8 @@ if __name__ == "__main__":
     # while complete
     
     # Save database
-    print('saving to database...')
+    print('>> saving to database...')
     r.bgsave
-
 
     # ## Critical zone
     # Below cell will remove all the records and json files as well!
@@ -162,6 +146,6 @@ if __name__ == "__main__":
             if not f.endswith(".json"):
                 continue
             os.remove(os.path.join(current_directory, f))
-        print('Data cleared')
+        print('>> Data cleared')
     else:
-        print('Action undone')
+        print('>> Action undone')

@@ -31,7 +31,7 @@ def create(key, value, ttl, expiry):
             with open(file_name, 'w') as json_file:
                 json.dump(value, json_file)
     else:
-        print('Key already exists')
+        print('>> Key already exists')
 
 # Finds key record
 def read(key):
@@ -57,7 +57,7 @@ def validity(key):
 
 if __name__ == "__main__": 
     while(True):
-        # os.system('cls')
+        os.system('cls')
         print("---------------- MENU ----------------")
         print("1. Insert\n2. Read\n3. Delete\n4. Check time remainnig\n5. Exit\n")
         choice = int(input('$ '))
@@ -84,6 +84,7 @@ if __name__ == "__main__":
                 create(key, value, True, expiry)
             elif(ttl=='n'):
                 create(key, value, False, -1)
+            input('\nPress enter to return to the Menu: ')
 
         elif(choice==2):
             # ### Search for a key
@@ -95,7 +96,8 @@ if __name__ == "__main__":
                 print('>> Key not exists')
             else:
                 p_value = pickle.loads(value)
-                print(p_value)
+                print(json.dumps(p_value, indent=4, sort_keys=True))
+            input('\nPress enter to return to the Menu: ')
 
         elif(choice==3):
             # ### Delete record
@@ -111,6 +113,7 @@ if __name__ == "__main__":
                 print('>> Record removed')
             else:
                 print('>> Record/Key not found')
+            input('\nPress enter to return to the Menu: ')
 
         elif(choice==4):
             # ### Check time remaining for key
@@ -123,6 +126,7 @@ if __name__ == "__main__":
                 print(f">> {key} does not exists")
             else:
                 print(f">> {seconds}s")
+            input('\nPress enter to return to the Menu: ')
 
         else:
             break;

@@ -63,96 +63,105 @@ def delete(key):
 def validity(key):
     return r.ttl(key)
 
+if __name__ == "__main__": 
+    while(True):
+        print("---------------- MENU ----------------")
+        print("1. Insert\n2. Read\n3. Delete\n4. Check time remainnig\n5. Exit")
+        choice = int(input())
+        if(choice==1):
+            # ### Insert record in database
+            print('Enter key: ')
+            key = input()
 
-# ### Insert record in database
+            print('Enter number of attributes: ') # specify nu/mber of attributes for json file
+            n = int(input())
 
-print('Enter key: ')
-key = input()
+            value = {}
+            # for each attributes: take attribute name and its value
+            for i in range(n):
+                print('Enter attribute name: ')
+                attribute = input()
+                print('Enter attribute value: ')
+                val = input()
+                value.update({attribute : val})
+            # value is python dictionary that will be converted in json object
 
-print('Enter number of attributes: ') # specify nu/mber of attributes for json file
-n = int(input())
+            print('Key supports TTL? y/n') # ttl should have value 'y' or 'n'
+            ttl = input()
 
-value = {}
-# for each attributes: take attribute name and its value
-for i in range(n):
-    print('Enter attribute name: ')
-    attribute = input()
-    print('Enter attribute value: ')
-    val = input()
-    value.update({attribute : val})
-# value is python dictionary that will be converted in json object
-
-print('Key supports TTL? y/n') # ttl should have value 'y' or 'n'
-ttl = input()
-
-if(ttl=='y'):
-    print('Enter validity in seconds')
-    expiry = input()
-    create(key, value, True, expiry)
-elif(ttl=='n'):
-    create(key, value, False, -1)
-
-
-
-# ### Search for a key
-print('Enter key to search: ')
-key = input()
-
-value = read(key)
-
-if(value==None):
-    print('Key not exists')
-else:
-    p_value = pickle.loads(value)
-    print(p_value)
+            if(ttl=='y'):
+                print('Enter validity in seconds')
+                expiry = input()
+                create(key, value, True, expiry)
+            elif(ttl=='n'):
+                create(key, value, False, -1)
 
 
-# ### Delete record
-print('Enter key of object to delete it: ')
-key = input()
+        elif(choice==2):
+            # ### Search for a key
+            print('Enter key to search: ')
+            key = input()
 
-status = delete(key) # if provided key exists delete() will return True otherwise False
+            value = read(key)
 
-if(status==True):
-    file_name = key+'.json' # retreiving file name
-    # necessary while trying delete file of ttl redis record
-    if(os.path.isfile(file_name)):
-        os.remove(file_name) # deleting json file
-    print('Record removed')
-else:
-    print('Record/Key not found')
+            if(value==None):
+                print('Key not exists')
+            else:
+                p_value = pickle.loads(value)
+                print(p_value)
+
+        elif(choice==3):
+            # ### Delete record
+            print('Enter key of object to delete it: ')
+            key = input()
+
+            status = delete(key) # if provided key exists delete() will return True otherwise False
+
+            if(status==True):
+                file_name = key+'.json' # retreiving file name
+                # necessary while trying delete file of ttl redis record
+                if(os.path.isfile(file_name)):
+                    os.remove(file_name) # deleting json file
+                print('Record removed')
+            else:
+                print('Record/Key not found')
+
+        elif(choice==4):
+            # ### Check time remaining for key
+            print('Enter key check validity of key: ')
+            key = input()
+
+            seconds = validity(key)
+            if(seconds==-1):
+                print(f"{key} does not have expiry timeout")
+            elif(seconds==-2):
+                print(f"{key} does not exists")
+            else:
+                print(f"{seconds}s")
+
+        else:
+            break;
+        print("\n\n")
+    # while complete
+    
+    # Save database
+    print('saving to database...')
+    r.bgsave
 
 
-# ### Check time remaining for key
-print('Enter key check validity of key: ')
-key = input()
+    # ## Critical zone
+    # Below cell will remove all the records and json files as well!
+    print('---------------- ATTENTION: Flush all? (y/n) ----------------')
+    choice = input()
 
-seconds = validity(key)
-if(seconds==-1):
-    print(f"{key} does not have expiry timeout")
-elif(seconds==-2):
-    print(f"{key} does not exists")
-else:
-    print(f"{seconds}s")
-
-
-# Save database
-print(r.bgsave)
-
-
-# ## Critical zone
-# Below cell will remove all the records and json files as well!
-print('Are you sure you want to flush all? y/n')
-choice = input()
-
-if(choice=='y'):
-    r.flushdb()
-    current_directory = os.getcwd() # because all json files are saved in current directory 
-    for f in os.listdir(current_directory):
-        # other files should not be deleted
-        if not f.endswith(".json"):
-            continue
-        os.remove(os.path.join(current_directory, f))
-    print('Data cleared')
-else:
-    print('Action undone')
+    if(choice=='y'):
+        r.flushdb()
+        current_directory = os.getcwd() # because all json files are saved in current directory 
+        for f in os.listdir(current_directory):
+            # other files should not be deleted
+            if not f.endswith(".json"):
+                continue
+            os.remove(os.path.join(current_directory, f))
+        print('Data cleared')
+    else:
+        print('Action undone')
